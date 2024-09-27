@@ -3,12 +3,12 @@ import os
 import gradio as gr
 from openai import OpenAI
 
+from lobotomy import compute_lobotomy_vector_function
+
 client = OpenAI()
 
 # Function to handle the user input and perform the query
 def perform_query(word):
-    # Prompt for the OpenAI model
-    prompt = f"Please provide a few sentences that include the word or phrase '{word}'."
 
     try:
         # OpenAI API call
@@ -26,23 +26,25 @@ def perform_query(word):
     except Exception as e:
         return f"An error occurred: {e}"
 
+with gr.Blocks() as demo:
+    gr.Markdown("# OpenAI Query Interface using Gradio Blocks")
+    gr.Markdown("Enter a word or phrase and get sentences that include it.")
 
-# Create a Gradio interface
-interface = gr.Interface(
-    fn=perform_query,                   # The function to call when the user submits input
-    inputs=gr.Textbox(label="Enter a word"),   # Input is a text box
-    outputs="text",                     # Output will be shown as text
-    title="Word Query",                 # Title of the interface
-    description="Enter a word to query for it.", # Description shown to the user
-)
+    with gr.Row():
+        word_input = gr.Textbox(label="Enter a word or phrase")
+    with gr.Row():
+        lobotomy_vector = gr.Textbox(label="lobotomy vector")
+    with gr.Row():
+        lobotomy_text = gr.Textbox(label="Generated Sentences")
 
-interface2 = gr.Interface(
-    fn=perform_query,                   # The function to call when the user submits input
-    inputs=gr.Textbox(label="Enter a word"),   # Input is a text box
-    outputs="text",                     # Output will be shown as text
-    title="Word Query",                 # Title of the interface
-    description="Enter a word to query for it.", # Description shown to the user
-)
+    with gr.Row():
+        submit_button = gr.Button("Submit")
+        compute_lobotomy_vector = gr.Button("compute lobotomy_vector")
+
+    submit_button.click(perform_query, inputs=word_input, outputs=lobotomy_text)
+    compute_lobotomy_vector.click(compute_lobotomy_vector_function, inputs=lobotomy_text, outputs=lobotomy_vector)
+
+
 
 # Launch the interface
-interface.launch()
+demo.launch()
